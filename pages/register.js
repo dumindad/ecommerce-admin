@@ -1,9 +1,10 @@
 "use client"
+import Layout from '@/components/Layout';
 import React, { useState } from 'react'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function register() {
+function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -48,32 +49,35 @@ function register() {
         }
     }
     return (
-        <div>
-            <ToastContainer />
-            register
-            <form onSubmit={handleSubmit}>
-                <div className='flex '>
-                    <input onChange={(e) => setEmail(e.target.value)} type='email' placeholder='your Email'>
-                    </input>
-                </div>
-                <div className='flex flex-col mb-6'>
-                    <input onChange={(e) => setUsername(e.target.value)} type='text' placeholder='your UserName'>
-                    </input>
-                </div>
-                <div className='flex flex-col mb-6'>
-                    <input onChange={(e) => setPassword(e.target.value)} type='password' placeholder='your Password'>
-                    </input>
-                </div>
-                <button type='submit'>Submit</button>
+        <Layout >
 
-            </form>
             <div>
-                <span>
-                    Already have account ?
-                </span>
-            </div> 
-        </div>
+                <ToastContainer />
+                register
+                <form onSubmit={handleSubmit}>
+                    <div className='flex '>
+                        <input onChange={(e) => setEmail(e.target.value)} type='email' placeholder='your Email'>
+                        </input>
+                    </div>
+                    <div className='flex flex-col mb-6'>
+                        <input onChange={(e) => setUsername(e.target.value)} type='text' placeholder='your UserName'>
+                        </input>
+                    </div>
+                    <div className='flex flex-col mb-6'>
+                        <input onChange={(e) => setPassword(e.target.value)} type='password' placeholder='your Password'>
+                        </input>
+                    </div>
+                    <button type='submit'>Submit</button>
+
+                </form>
+                <div>
+                    <span>
+                        Already have account ?
+                    </span>
+                </div>
+            </div>
+        </Layout>
     )
 }
 
-export default register
+export default Register
