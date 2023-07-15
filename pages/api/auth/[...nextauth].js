@@ -1,8 +1,8 @@
 import NextAuth, { getServerSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import connectMongo from '../../../database/conn';
 import Users from '@/models/UserModels';
 import { compare } from 'bcrypt';
+import connectMongo from '@/lib/dbConnect';
 
 const adminEmails = ['admin@gmail.com']
 

@@ -2,23 +2,26 @@ import Layout from "@/components/Layout";
 import Link from "next/link";
 import {useEffect, useState} from "react";
 import axios from "axios";
+import Spinner from "@/components/Spinner";
 
 export default function Products() {
   const [products,setProducts] = useState([]);
-  const [images, setImages] = useState([]);
+  const [isUploading,setIsUploading] = useState(false);
   useEffect(() => {
-    axios.get('/api/products/products').then(response => {
+    setIsUploading(true)
+    axios.get('/api/products').then(response => {
       setProducts(response.data);
-    });
-  }, []);
-  useEffect(() => {
-    axios.get('/api/uploadImage').then(response => {
-      setImages(response.data);
+      setIsUploading(false)
     });
   }, []);
   return (
     <Layout>
       <Link className="btn-primary" href={'/products/new'}>Add new product</Link>
+      {isUploading && (
+          <div className="h-24 flex items-center justify-center">
+            <Spinner />
+          </div>
+        ) }
       <table className="basic mt-2">
         <thead>
           <tr>

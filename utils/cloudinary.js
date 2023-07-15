@@ -1,17 +1,17 @@
-import { Product } from '@/models/Product'
 import { v2 as cloudinary } from 'cloudinary'
 
- cloudinary.config({
+const cloudinaryMyconfig = cloudinary.config({
     cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true
 })
 
-// const opts = {
-//     overwrite: true,
-//     invalidate: true,
-//     resource_type: "auto",
-// };
+const opts = {
+    overwrite: true,
+    invalidate: true,
+    resource_type: "auto",
+};
 
 
 const uploads = (file, folder) => {
@@ -47,4 +47,4 @@ const uploads = (file, folder) => {
     })
   
 }
-export { uploads, cloudinary}
+export { uploads, cloudinaryMyconfig}

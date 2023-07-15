@@ -4,10 +4,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import Spinner from "@/components/Spinner";
 import { ReactSortable } from "react-sortablejs";
-// import { generateSignature } from '../backend/utils/generateSignature';
-// import { uploads } from "@/backend/utils/cloudinary";
-// import { UploadImg } from "@/controllers/productControllers";
-
+import { useForm } from "react-hook-form";
 
 export default function ProductForm({
   _id,
@@ -15,221 +12,197 @@ export default function ProductForm({
   description: existingDescription,
   price: existingPrice,
   images: existingImages,
-  category: assignedCategory,
+   category: assignedCategory,
   properties: assignedProperties,
 }) {
+  // console.log("existingImages", existingImages)
   const [title, setTitle] = useState(existingTitle || '');
   const [description, setDescription] = useState(existingDescription || '');
   const [category, setCategory] = useState(assignedCategory || '');
   const [productProperties, setProductProperties] = useState(assignedProperties || {});
   const [price, setPrice] = useState(existingPrice || '');
   const [images, setImages] = useState(existingImages || []);
-  const [imagesPreview, setImagesPreview] = useState(existingImages || []);
   const [goToProducts, setGoToProducts] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-
   const [categories, setCategories] = useState([]);
+  // const [selectedImage, setSelectedImage] = useState([]);
+  // const [selectedFile, setSelectedFile] = useState([]);
+  const [exImages, setExImages] = useState([]);
   const router = useRouter();
+  const [imagesPreview, setImagesPreview] = useState([]);
+  // const [imgDeletOnUpdate, setImgDeletOnUpdate] = useState();
 
-  const [isImageUploaded, setIsImageUploaded] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [uploadSignature, setUploadSignature] = useState('');
-  const [imgs, setImgs] = useState([]);
-  const [imgsPreview, setImgsPreview] = useState([]);
-  const [url, setUrl] = useState("");
-  const [fileName, setFileName] = useState([""]);
-  const [imgFile, setImgFile] = useState(null);
+  // const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
   useEffect(() => {
     axios.get('/api/categories').then(result => {
       setCategories(result.data);
     })
   }, []);
+  useEffect(() => {
+    setExImages([])
+    existingImagesUrlExtract()
+    console.log("newColImages", exImages)
+    // setImagesPreview(exImages)
+  }, [imagesPreview])
 
-  
+
+  const existingImagesUrlExtract = () => {
+    console.log("newes EX", existingImages)
+    console.log("newes PR", imagesPreview)
+    if(existingImages?.length >0 && imagesPreview?.length >0){
+      // const newArrayColImages = []
+      // const exImagesArr = existingImages?.map( x =>  ({url: x?.url}))
+      // const newColImages = imagesPreview.map( x => ({url: x}))
+      console.log("newes", imagesPreview)
+
+      // newArrayColImages.push(exImagesArr, newColImages)
+      const newColImages = imagesPreview.map( x => ({url: x}))
+      // const newColImages = imagesPreview.map( x =>  x)
+      setExImages(newColImages)
+    }
+    else
+    if (existingImages?.length > 0) {
+      setExImages(existingImages)
+      // const exImagesArr = existingImages?.map(x => ({ url: x?.url }))
+      // // newColImages.push(exImages)
+      // setExImages(exImagesArr)
+    }
+    else
+    if(!existingImages?.length >0 && imagesPreview?.length >0 ){
+
+          // setExImages(imagesPreview)
+
+      const newColImages = imagesPreview.map( x => ({url: x}))
+      console.log("newes", imagesPreview)
+        setExImages(newColImages)
+      // newColImages.push(exImagesPreview)
+    }
+
+  }
+
+  // async function uploadImages(ev) {
+  //   const files = Array.from(ev.target.files);
+
+  //     const file = ev.target.files[0];
+  //     setSelectedImage(URL.createObjectURL(file));
+  //     setSelectedFile(file);
+  //     setImagesPreview([]);
+
+  //     setImages([]);
+  //     console.log(files)
+  //     setExImages([]);
+  //     if (!selectedFile) return;
+  //     const formData = new FormData();
+  //     formData.append("image", selectedImage);
+  //     SetFormData(formData)
+  //     let fileResults = [];
+  //     files.forEach((file) => {
+  //       const reader = new FileReader();
+  //       reader.onload = async () => {
+  //         if (reader.readyState === 2) {
+  //           console.log("selected newes1",  reader?.result)
+  //           fileResults.push( reader?.result)
+  //           setImagesPreview(fileResults);
+            
+  //           // setImagesPreview((oldArray) => [...oldArray, reader?.result]);
+  //           // const result = []
+  //           // result.push(reader?.result)
+  //           // console.log("emty1", result )
+  //           //   console.log("emty2", reader?.result )
+  //           // console.log("newes2", imagesPreview)
+
+
+  //           // console.log("newColImages", imagesPreview)
+  //         }
+  //       };
+
+
+  //       reader.readAsDataURL(file);
+  //       setImages((oldArray) => [...oldArray, file]);
+  //   //     const newColImages =  imagesPreview?.map( x => ({url: x}))
+  //   //     console.log("newColImages 3", newColImages)
+  //   //     setExImages(imagesPreview)
+  //   // console.log("Images 123", exImages)
+      
+  //       // console.log("imag64", imagesPreview)
+  //     });
+
+  //   setIsUploading(false);
+
+  // }
+
+  const reader = (file) =>
+    new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr);
+      fr.onerror = (err) => reject(err);
+      fr.readAsDataURL(file);
+    });
+
+  async function logImagesData(evt) {
+   
+    setIsUploading(true);
+    const fileList = [...evt.target.files]
+    let fileResults = [];
+    const frPromises = fileList.map(reader);
+    setExImages([])
+    try {
+      fileResults = await Promise.all(frPromises);
+    } catch (err) {
+      // In this specific case, Promise.all() might be preferred
+      // over Promise.allSettled(), since it isn't trivial to modify
+      // a FileList to a subset of files of what the user initially
+      // selected. Therefore, let's just stash the entire operation.
+      console.error(err);
+      return;
+    }
+
+    let result = []
+    fileResults.forEach((fr) => {
+      
+      result.push(fr.result)
+      console.log("abbbb", fr.result); // Base64 `data:image/...` String result.
+      setImagesPreview(result)
+      // setImages(result)
+    });
+    
+    console.log("setImagesPreview", imagesPreview); // Base64 `data:image/...` String result.
+    setIsUploading(false);
+  }
+
+
   async function saveProduct(ev) {
     ev.preventDefault();
-    const formData = new FormData()
-    // images.forEach((image)=> {
-      // formData.append("title", title);
-      // formData.append("description", description);
-      // formData.append("price", price);
-      // formData.append("category", category);
-      // formData.set("image", image);
-
-    
-      images.forEach((imgFile) => {
-        formData.append('image', imgFile);
-       
-      })
+    const data = {
+      title, description, price, images, imagesPreview, exImages, existingImages, category,
+      properties: productProperties
+    };
+    // console.log(imagesPreview)
+    console.log("payload data images" ,images)
+    if (_id) {
+      //update
       
-      //       try{
-        // const res = await axios.post(baseUrl + '/api/products/pro', file)
-        //       }catch(error){
-          //         return getValue(error, ["response", "data"]);
-          //       }
-          
-          // })
-          const data = {
-            title, description, price, category,
-            properties: productProperties, imgFile
-            
-          };
-          if (_id) {
-            //update
-            await axios.put('/api/products/products', { ...data, _id });
-            // await axios.put('/api/upload', { ...formData, _id });
-          } else {
-            //create
-            console.log("formData", data)
-      await axios.post('/api/products/create', data, {
-          headers:{
-            "Content-Type": "multipart/form-data",
-          },
-        });
-      // await axios.post('/api/products/products', data);
-      // await axios.post(`${process.env.API_URL}/api/upload/${id}`, formData,
-      // {
-      //   headers:{
-      //     "Content-Type": "multipart/form-data",
-      //   },
-      // });
+      await axios.put('/api/products', { ...data, _id });
+    } else {
+      //create
+      
+      await axios.post('/api/products', data, {
+        
+      })
+        .then(response => {
+          console.log(response?.data)
+          setImages([response?.data?.url])
+        })
+     
     }
     setGoToProducts(true);
   }
   if (goToProducts) {
     router.push('/products');
   }
-  async function uploadImages(e) {
-    // ---------------test upload------------------
 
-console.log(e.target.value)
-console.log(e.target.files[0])
-const file = e.target.files[0];
-const base64 = await convertBase64(file);
-setFileName(file.name)
-setImgFile(file)
-// const formData = new FormData()
-//     images.forEach((image)=> {
-//       formData.append("image", image);
-//       formData.append("image", base64);
-//     })
-//     console.log("formData", base64)
-// setLoading(true);
-// await axios.post('/api/uploadImage',
-// // formData,
-// formData ,
-// {
-//   headers:{
-//         "Content-Type": "multipart/form-data",
-//       },
-// }).then((res)=> {
-//   setUrl(res.data);
-//   alert("Image uploaded Succesfully")
-// }).then(()=> setLoading(false))
-// .catch(console.log)
-    // ---------------end upload-------------------
 
-    // const files = ev.target?.files;
-    // if (files?.length > 0) {
-    //   setIsUploading(true);
-    //   const data = new FormData();
-    //   for (const file of files) {
-    //     data.append('file', file);
-    //   }
-    //   data.append({
-    //     uploadPreset:'upload_preset', 
-    //     cloudName: 'ml_ecomm',
-    //     apiKey: process.env.CLOUDINARY_API_KEY,
-    //     uploadSignature: await generateSignature
-    //   })
-    //   console.log("data",data)
-    //   // const res = await axios.post('/api/upload', data);
-    //   // const res = await axios.post(process.env.CLOUDINARY_URI, data);
-    //   const res = await fetch('/api/upload', {
-    //     method: 'POST',
-    //     body: data 
-    //   }).then(r => r.json()) ;
-    //   console.log('data post', data)
-    // ----------------------------------------
-    // const  uploadSignature = await generateSignature
-    //     setUploadSignature(uploadSignature)
-    //     console.log('uploadSignature', uploadSignature)
-
-    //   const widget = window.cloudinary.createUploadWidget(
-    //     {
-    //       cloudName: 'ds5zhj9f2',
-    //       uploadPreset: 'ml_ecomm',
-    //       resourceType: "image",
-    //       // apiKey: process.env.CLOUDINARY_API_KEY,
-    //       apiKey: '615917694752293',
-    //       uploadSignature: uploadSignature
-    //     },
-    //     // console.log('ab1111'),
-    //     // console.log('ab2222', error),
-    //     (error, result) => {
-    //       if (!error && result && result.event === "success") {
-    //         setIsImageUploaded(true);
-
-    //       } else if (error) {
-    //         console.log(error);
-    //       }
-    //     }
-    //     )
-    //     console.log("Uploaded", result?.info),
-    //   widget.open();
-    // -----------------------------------------
-    //   setImages(oldImages => {
-    //     return [...oldImages, ...res.data.links];
-    //   });
-    //   setIsUploading(false);
-    // }
-// ================ Abas ---------------------
-    // const files = Array.from(e.target.files)
-
-    // setImages([])
-    // setImgsPreview([])
-
-    // files.forEach((file) => {
-
-    //   const reader = new FileReader();
-
-    //   reader.onload = () => {
-    //     if (reader.readyState === 2) {
-    //       setImgsPreview((oldArray) => [...oldArray, reader.result])
-    //     }
-    //   }
-    //   setImages((oldArray) => [...oldArray, reader.file])
-    //   reader.readAsDataURL(file);
-
-    // })
-    // -------------------------end--------------------
-  }
-
-  const convertBase64 = (file) => {
-    return new Promise((resolve, reject) =>{
-      const fileReader = new FileReader();
-      if(file){
-
-        
-        fileReader.onload = () => {
-          // if(fileReader.readyState === 2 ){
-
-            resolve(fileReader.result);
-            setImages([fileReader.result])
-            // setImagesPreview((oldArray) => [...oldArray, fileReader.result])
-          // }
-        };
-        // setImages((oldArray) => [...oldArray, file])
-        fileReader.readAsDataURL(file);
-      }else{
-        setImages(existingImages || [])
-      }
-      fileReader.onerror = (error) =>{
-        reject(error);
-      }
-    })
-  }
 
   function updateImagesOrder(images) {
     setImages(images);
@@ -252,17 +225,22 @@ setImgFile(file)
       catInfo = parentCat;
     }
   }
+  
+  console.log("image", exImages)
 
   return (
+    // <form onSubmit={handleSubmit(saveProduct)}>
     <form onSubmit={saveProduct}>
       <label>Product name</label>
       <input
+        name="title"
         type="text"
         placeholder="product name"
         value={title}
         onChange={ev => setTitle(ev.target.value)} />
       <label>Category</label>
       <select value={category}
+        name="category"
         onChange={ev => setCategory(ev.target.value)}>
         <option value="">Uncategorized</option>
         {categories.length > 0 && categories.map(c => (
@@ -271,9 +249,10 @@ setImgFile(file)
       </select>
       {propertiesToFill.length > 0 && propertiesToFill.map(p => (
         <div key={p.name} className="">
-          <label>{p.name[0].toUpperCase() + p.name.substring(1)}</label>
+          <label>propertiesToFill -{p.name[0].toUpperCase() + p.name.substring(1)}</label>
           <div>
             <select value={productProperties[p.name]}
+              name="productProperties"
               onChange={ev =>
                 setProductProp(p.name, ev.target.value)
               }
@@ -289,19 +268,18 @@ setImgFile(file)
         Photos
       </label>
       <div className="mb-2 flex flex-wrap gap-1">
-       
+        
         <ReactSortable
-          list={images}
+          list={exImages}
           className="flex flex-wrap gap-1"
-          setList={updateImagesOrder}
-          >
-          {!!images?.length && images.map(link => (
+          setList={updateImagesOrder}>
+          {!!exImages?.length && exImages.map(link => (
             <div key={link} className="h-24 bg-white p-4 shadow-sm rounded-sm border border-gray-200">
-              <img src={link} alt="" className="rounded-lg" />
+              <img src={link?.url} alt="" className="rounded-lg" />
             </div>
           ))}
-         
         </ReactSortable>
+      
         {isUploading && (
           <div className="h-24 flex items-center">
             <Spinner />
@@ -314,7 +292,15 @@ setImgFile(file)
           <div>
             Add image
           </div>
-          <input type="file" multiple onChange={uploadImages} className="hidden" />
+          <input
+            id="images"
+            // name="image" 
+            type="file"
+            // multiple onChange={uploadImages}
+            multiple onChange={logImagesData}
+            // {...register("image")}
+            className="hidden"
+          />
         </label>
       </div>
       <label>Description</label>
@@ -325,6 +311,7 @@ setImgFile(file)
       />
       <label>Price (in USD)</label>
       <input
+        name="price"
         type="number" placeholder="price"
         value={price}
         onChange={ev => setPrice(ev.target.value)}
@@ -332,8 +319,7 @@ setImgFile(file)
       <button
         type="submit"
         className="btn-primary">
-          {!loading ? 'Save': 'Save....'}
-        
+        Save
       </button>
     </form>
   );

@@ -9,5 +9,5 @@ const userSchema = new Schema({
     telephone:String
 })
 
-const Users = models.user || model('user', userSchema);
+const Users = models.User || model('User', userSchema);
 export default Users;
