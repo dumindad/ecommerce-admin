@@ -4,7 +4,7 @@ import connectMongo from "../../database/conn";
 import { hash } from 'bcrypt';
 // import User from "@/models/User";
 // import { mongooseConnect } from "@/lib/mongoose";
-// import { isAdminRequest } from "@/pages/api/auth/[...nextauth]";
+import { isAdminRequest } from "@/pages/api/auth/[...nextauth]";
 
 // import bcrypt, { hash } from "bcryptjs";
 // import connectMongo from "../../../database/conn";
@@ -15,15 +15,15 @@ export default async function Handler(req, res){
    await connectMongo().catch(error => res.status(500).json({error: "Connection Failed..!"}))
    const {method} = req;
 //   await mongooseConnect();
-  // await isAdminRequest(req,res);
+  await isAdminRequest(req,res);
 
   
 
   if (method === 'POST') {
-    const {username, email, password} = req.body;
-    console.log(req.body)
+    const {username, email, password, role, telephone} = req.body;
+    console.log("req.body", req.body)
     const userDoc = await Users.create({
-        username, email, password: await hash(password, 12)
+      username, email, role, telephone, password: await hash(password, 12)
     
     })
     res.json(userDoc);

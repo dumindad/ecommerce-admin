@@ -8,11 +8,13 @@ function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [role, setRole] = useState("");
+    const [telephone, setTelephone] = useState("");
     const notify = () => toast("Wow so easy!");
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        // console.log("userName", username)
+        console.log("userName", username, email, password, role, telephone)
 
         if (username === '' || email === '' || password === '') {
             notify.error("fill all fields")
@@ -28,7 +30,7 @@ function Register() {
                     'Content-type': 'application/json'
                 },
                 method: 'POST',
-                body: JSON.stringify({ username, email, password })
+                body: JSON.stringify({ username, email, password, role, telephone })
 
             }).then((res) => res.json());
             console.log("abc", res)
@@ -61,6 +63,14 @@ function Register() {
                     </div>
                     <div className='flex flex-col mb-6'>
                         <input onChange={(e) => setUsername(e.target.value)} type='text' placeholder='your UserName'>
+                        </input>
+                    </div>
+                    <div className='flex flex-col mb-6'>
+                        <input onChange={(e) => setRole(e.target.value)} type='text' placeholder='Role'>
+                        </input>
+                    </div>
+                    <div className='flex flex-col mb-6'>
+                        <input onChange={(e) => setTelephone(e.target.value)} type='text' placeholder='your User Telephone No.'>
                         </input>
                     </div>
                     <div className='flex flex-col mb-6'>

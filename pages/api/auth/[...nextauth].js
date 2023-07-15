@@ -4,9 +4,9 @@ import connectMongo from '../../../database/conn';
 import Users from '@/models/UserModels';
 import { compare } from 'bcrypt';
 
+const adminEmails = ['admin@gmail.com']
 
-
-export default NextAuth({
+export const authOptions = {
   // export const authOptions = {
   session: {
     strategy: "jwt",
@@ -47,6 +47,7 @@ export default NextAuth({
           // user
           name: user.username,
           email: user.email,
+          role: user.role,
           id: user._id
         }
       }
@@ -56,11 +57,19 @@ export default NextAuth({
 
 
   callbacks: {
+    session: ({session, token, user}) =>{
+      if(adminEmails.includes(session?.user?.email)){
+        return session;
+      }else{
+        return false;
+      }
+    },
     // Getting the JWT token from API response
     async jwt(params) {
       if (params.user?.email) {
         params.token.email = params.user.email;
         params.token.id = params.user.id;
+        params.token.role = params.user.role;
 
       }
 
@@ -76,16 +85,19 @@ export default NextAuth({
     }
   }
 
-})
+}
+
+export default NextAuth(authOptions)
+
 export async function isAdminRequest(req, res) {
   const session = await getServerSession(req, res, authOptions);
-  if (!adminEmails.includes(session?.user?.email)) {
+  console.log('admin', session?.token?.email)
+  if (!adminEmails.includes(session?.token?.email)) {
+  
     res.status(401);
     res.end();
     throw 'not an admin';
   }
 }
 
-// const authHandler = NextAuth(authOptions);
 
-// export { authHandler as GET, authHandler as POST};
